@@ -1,0 +1,15 @@
+Package: anchors
+Version: 3.0-9
+Title: Statistical analysis of surveys with anchoring vignettes
+Description: Tools for analyzing survey responses with anchors.
+Authors@R: c(
+  person("Jonathan", "Wand", role = c("aut")),
+  person("Gary", "King", email = "king@harvard.edu", role = c("aut", "cre"),
+         comment = c(ORCID = "0000-0002-5327-7631")),
+  person("Olivia", "Lau", role = c("aut")),
+  person("Christopher", "Hare", email = "cdhare@ucdavis.edu", role = "ctb")
+  )
+Depends: R (>= 3.0.0)
+Imports: rgenoud, MASS, stats, graphics, grDevices, utils
+License: GPL (>= 2)
+Config/build/clean-inst-doc: FALSE

@@ -1,0 +1,14 @@
+anchors.plot      Demo of plotting with anchors
+chopit 		  Demo of parametric model chopit
+anchors.freedom   Repl Wand et al (2007) rank analysis of freedom
+anchors.freedom6  Repl Wand et al (2007) Fig 1 histo with 6 vign
+anchors.freedom3  Repl Wand et al (2007) Fig 2 histo with 3 vign
+chopit.freedom    Repl Wand et al (2007) Table 4 (chopit, linear)
+anchors.vign2     Repl from King and Wand (2007) Tb 1
+anchors.mexchn    Repl from King and Wand (2007) Fig1
+combn.say	  Repl from King and Wand (2007) Fig2
+combn.sleep	  Repl from King and Wand (2007) Fig3
+combn.care	  Repl from King and Wand (2007) Fig4 
+chopit.mexchn     Repl King et al (2004) Table 2 (non-linear taus)
+anchors.mexchn2   Repl King et al (2004) Figure 2 
+unit.cpolr.sim    Unit tests for cpolr(): simulate DGP

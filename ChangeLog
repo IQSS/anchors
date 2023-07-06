@@ -1,0 +1,213 @@
+1.0 : 2002-10-22 : by Jonathan Wand
+* Initial release
+
+1.1 : 2002-11-09 : by Jonathan Wand
+* chopit():
+** change default setting: NOW do.oprobit=FALSE
+** uses optim(,hessian=T) for Hessian; drops RAM intensive fdHess
+** removed optional printing  of final results (use summary() )
+** removed optional processing of hessian, and printing (use summary())
+
+1.2 : 2003-01-02 : by Jonathan Wand
+* chopit():
+** ported objective functions for ordered probits to C
+** ported cumulative sum of rows in matrix to C (Crowcumsum)
+** no longer builds unique/grouped data
+* zzz.R
+** redefines generic .First.lib function
+** automated dynamic loading of C objects
+** invokes require(cutil)
+
+1.3 : 2003-06-25 : by Jonathan Wand
+* conjure library
+**  Jonathan Wand's new library of functions and utilities (replaces cutil)
+**  provides compatibility with R 1.7
+* chopit()
+**  added options
+**  - use.linear (T/F): linear parameterization of taus and sigmas
+**  - use.gr (T/F): analytical gradients for linear param. with no random effect
+**  - use.genoud (T/F): rgenoud optimization
+**  - single.vign.var (T/F): constrain variances of vignettes to be same
+**  - na.rm (T/F): listwise deletion of rows with non-finite data
+**  - do.profile (T/F): development flag for profiling likelihood function time
+**  removed options:
+**  - do.oprobit: ordered probit options
+**  - warmup    : low ordered gh approximation first
+**  NEW DEFAULTS:
+**  - use.linear = T
+**  - use.gr     = T
+**  - na.rm      = T
+
+1.4 : 2003-08-30 : by Jonathan Wand
+* REQUIRES >= R 1.8
+* tcl/tk
+** - Windows GUI version of anchors.gui() no longer requires separate
+**   installation of tcl/tk.
+* chopit()
+** - Analytical gradients available for some model specifications
+* entropy.maxmin()
+** - new function
+
+1.5 : 2004-07-03 : by Jonathan Wand
+* REQUIRES >= 1.9.1
+* namespace
+** - implements namespace/S3
+** - created NAMESPACE file to define exported functions
+** - added package info for .C calls
+* chopit
+** - removed used of auto.attach for packv; uses local scoped variables
+** - no longer uses unpackd(); uses subset(...,select=...)
+** - fixes/generalizes how analytical gradients are returned:
+**   now works for all normalizations, no longer dies on self with icpt in x0
+** - cleans up listwise deletion code; NOTE: no longer delete cases with !is.finite():
+**   relies entirely on model.matrix() for case deletion choices
+* mrop / mrop.summary
+** - new function by Dan Hopkins
+* man
+** - added man page for anchors.gui()
+** - added man page for mrop.* (just a shell, Dan needs to fills these in)
+** - minor cleaning of others
+
+1.7
+* Dan Hopkins and Gary King redefine C when vectored valued
+  produced by anchors.np()
+* This definition of C existed only for this one release,
+  and is not supported in any other.
+
+1.8 - 1.9-2:  UNOFFICIAL and dubious versions of code
+* These versions were not intended for public use/distribution
+* These versions were experimental and untested versions of code
+  that were posted by a rogue programmer on one local but publicly accessable site:
+  http://gking.harvard.edu/R/CRAN/src/contrib/
+  http://gking.harvard.edu/bin/windows/contrib/2.3
+* Any user who inadvertently found and used these versions of the code
+  should NOT rely on results produced by these versions.
+
+2.0 : 2007-02-06 : Jonathan Wand
+* This is a significant rewrite/reorganization of the library
+  Highlights of user noticeable changes are listed below.
+* At this point in development it was felt to be more important to
+  establish consistency of invocations across functions than to maintain
+  backward compatibility.
+
+* S3 methods are used uniformly throughout
+* formula / model.matrix invocation use throughout,
+** - replacing list of string vectors
+** - retains convention that missing self/vignette responses
+**   are coded as zero (thus are not deleted in parametric model [chopit]
+**   but are deleted in non-parametric models [ anchors ]
+* most uses of term 'ties' in anchors()/C is changed to 'intervals'
+**   BUT ties is still an unambigious and used term in vignette.order()
+* drops need for library(combinat)
+** - now in library(utils)
+
+* demo/
+** - new demo files for functions
+* data/
+** - additional datasets available
+
+* anchors()
+** - was anchors.np()
+** - returned to earlier definition of 'C'
+** - improved naming of returned values
+* anchors.me()
+** - new function to get minimal entropy allocation of interval of C
+** - best user interface for use of minimum.entropy()
+* cpolr()
+** - modification of polr[MASS] allowing for intervals in ordered probit
+**   REPLACES 1.9-2 mrop() which had errors
+** - fitted.cpolr() method:
+**   if combined with anchors object, also can produce conditional fitted values
+* anchors.intervals()
+** - was anchors.intervals()
+** - separates out/new methods plot.anchors.intervals() and print.anchors.intervals()
+* chopit.density()
+** - was chopit.posterior
+* entropy()
+** - now calcuates entropy for single vignette subsets too
+** - uses minimum.entropy(), which deterministically finds
+**   minimum entropy allocation of interval Cs
+** - genoud search still an option, but is not needed given
+**   minimum.entropy(); will likely be dropped in future versions
+** - renamed column headings of output
+* func.packv: removed all uses of attach()
+* insert() [ by Olivia Lau, with corrections ]
+** - new helper function to take C in anchors object and
+**   insert into original dataframe used to create C
+* minimum.entropy()
+** - new function for calculating minimum entropy allocation
+**   of interval values of C in a deterministic manner with
+**   finite steps
+* replace.value()
+** - helper function to replace values in specified columns of dataframe
+**   used to facilitate '0'=missing value convention for responses
+* vignette.order()
+** - additional diagnostics of ordering
+
+
+2.0-1 : 2007-02-19 : Jonathan Wand
+
+* chopit
+** - enable vignette only invocation
+** - corrected use of model.matrix to get vign with intercepts
+**   even when no vars specified
+** - drop vign.only option (only previouly useful for sets of vignettes)
+** - single vignette handled differently
+
+* anchors
+** - enable dataframes with single row
+
+* summary.chopit
+** - return invisible coefficient matrix
+
+* demo(anchors.mexch)
+** - updated/corrected change to Cunif
+
+2.0-3: 2007-07-01 : Jonathan Wand : minor changes, not publicly released
+
+3.0-1: 2008-04-20 : Jonathan Wand : major changes : not public
+
+NOTE: new simplified syntax NOT backward compatible with prior versions
+exceptions are vanilla call,
+    anchors(formula.list, data, method="chopit")
+  same as
+    chopit(formula.list, data)
+
+* anchors(): NEW unified function call
+** - replaces chopit, anchors, vignette.order
+** - includes simplified use of cpolr
+** - additional S3 summary() for each method, and [bar]plot for some methods
+
+* anchors.options: NEW unified handling of options for anchors functions
+* anchors.data: NEW unified handling of data building based on anchors formulas
+** - allows user specified missing values in responses (see anchors.options)
+** - allows NA in responses to not cause listwise deletion
+     i.e., allows user controlled listwise or minimal deletion
+
+* trim.data: UPDATE generalizes and replaces subset.anchors
+* replace.list: UPDATE minor update
+* replace.value: NAME CHANGE was replacevalue (changed for consistency)
+
+3.0-2 : JW : minor changes
+* plot functions made fully compliant with generic R invocations
+  revised barplot.anchors.rank replaces plot.anchor.rank
+  revised barplot.anchors.order replace pot.anchors.order
+* anchors method= now icludes B and C, replacing 'mehthod="rank" and type="B"', etc
+  and method="entropy" is dropped, replaced by combn=TRUE
+* new demo(anchors.plot)
+* enhanced documentation for plot functions, and anchors.chopit
+
+3.0-4 : JW :
+* returns to separate anchors() and chopit() funcitons; retains simplified interface
+
+3.0-8 : CH :
+* Changed as.real() to as.numeric throughout
+* Generally made compatible with R >= 3.0.0, put imports to MASS and rgenoud in namespace, removed required() calls to MASS and rgenoud as they are stated dependencies.
+* Removed all calls to html.sty in anchors vignette
+
+3.0-9 : NHG :
+
+* Moved `MASS` and `rgenoud` to `Imports`.
+* Updated and removed broken links.
+* Fixed bugs related to installation
+* Cleaned code (e.g., `class() == .` to `inherits()`)
