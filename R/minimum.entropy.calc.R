@@ -10,12 +10,12 @@ minimum.entropy.calc <- function(obj , debug=0 ) {
   if (obj$n.interval == 0) { return(NULL) }
 
   freq.non       <- as.numeric(obj$scalar$N)
-  idx <- obj$interval$from != obj$interval$to 
+  idx <- obj$interval$from != obj$interval$to
   out.span.count <- as.numeric(obj$interval$N[ idx ])
   tties <- subset( obj$interval, subset=idx , select=c("from","to"))
   rnames <- row.names(tties)
   mties <- as.matrix(tties)
-  
+
   ## how many span cat are there...
   ncombo <- eval(parse(text=paste("(",tties$to, "-", tties$from,"+1)" ,sep="", collapse="+")))
 
@@ -23,9 +23,9 @@ minimum.entropy.calc <- function(obj , debug=0 ) {
 
 #  print(ncombo)
 #  print(length(out.span.count))
-        
+
   k <- 0
-  for (i in 1:length(out.span.count)) {
+  for (i in seq_along(out.span.count)) {
     #print(tties$from[i]:tties$to[i])
     for (j in tties$from[i]:tties$to[i]) {
       k <- k+1
@@ -37,9 +37,9 @@ minimum.entropy.calc <- function(obj , debug=0 ) {
 
   cassign <- rep(NA,length(out.span.count))
 
-  for (i in 1:cmax) {
+  for (i in seq_len(cmax)) {
 
-    if (debug > 1) 
+    if (debug > 1)
       print( cbind(ridx,cidx,nidx))
 
     tmp <- tapply( nidx, cidx, sum )
@@ -49,12 +49,12 @@ minimum.entropy.calc <- function(obj , debug=0 ) {
       cat("apply\n")
       print(tmp)
     }
-    
+
     ttot <- freq.non
     for (j in ct ) {
       ttot[j] <- freq.non[j] + tmp[ ct == j ]
     }
-    ## what C are we going to load on 
+    ## what C are we going to load on
     cc <- which.max(ttot)
     ## which idx of expansion of ties does this then pull out
     ee <- cc == cidx
@@ -71,12 +71,12 @@ minimum.entropy.calc <- function(obj , debug=0 ) {
       cat("cassign\n")
       print(cassign)
     }
-    
+
     if (all(!is.na(cassign))) {
       names(cassign) <- rnames
       return(cassign)
     }
-    
+
     ## now delete used rows from cidx,ridx,nidx and do it again
     cidx <- cidx[ !(ridx %in% rr) ]
     nidx <- nidx[ !(ridx %in% rr) ]
@@ -85,5 +85,5 @@ minimum.entropy.calc <- function(obj , debug=0 ) {
     freq.non[cc] <- 0
   }
 
-  
+
 }

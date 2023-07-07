@@ -4,7 +4,7 @@ replace.value <- function( data, names, from=NA, to=as.integer(0), verbose=FALSE
 
   if (length(from) > 1) {
     mf <- match.call()
-    for (i in 1:length(from)) {
+    for (i in seq_along(from)) {
       mf$from <- from[i]
       mf$data <- eval(mf)
     }
@@ -28,7 +28,7 @@ replace.value <- function( data, names, from=NA, to=as.integer(0), verbose=FALSE
                   "typeof(to) is",typeof(to),"\n",
                   "whereas original typeof for columns were:\n",
                   paste( names[!ii], type[!ii], sep=" : ", collapse="\n "),"\n"))
-  } 
-  return(data) 
-} 
-  
+  }
+  return(data)
+}
+

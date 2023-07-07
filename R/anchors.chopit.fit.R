@@ -4,19 +4,19 @@
 ## Author  : Jonathan Wand <wand@stanford.edu>
 ## Created : 2007-08-20
 ##
-## Extracted and refined from former chopit()  
+## Extracted and refined from former chopit()
 ##
 #######################################################################
 anchors.chopit.fit <- function(data, parm, count, options) {
-  
+
   fitted    <- options$fitted
   verbose   <- options$verbose
   debug     <- options$debug
   print.oob <- options$print.oob
   offset    <- 0
   do.gr     <- options$analytic
-  get.LL <- FALSE  
-  
+  get.LL <- FALSE
+
   ###################################################################
   ##
   ## A.2 MODEL/LIKELIHOOD
@@ -30,12 +30,12 @@ anchors.chopit.fit <- function(data, parm, count, options) {
       n.cat <- tmp.n.cat
     return( (n.cat-1)*(i.self-1)+i.cat )
   }
-  
+
   chopit.llog <- function(b,do.gr=FALSE,verbose=FALSE) {
     if (debug > 1) cat("chopit.llog",do.gr,verbose,"\n")
-    
+
     ## JW: what if n.self == 0?
-    ## JW: I have sub'ed in count$n.tau.set for n.self in gamma = ... 
+    ## JW: I have sub'ed in count$n.tau.set for n.self in gamma = ...
     if (!do.gr) {
     } else {
       GR <- list(gamma1  = rep(0, count$nvars.gamma1),
@@ -46,16 +46,16 @@ anchors.chopit.fit <- function(data, parm, count, options) {
                  theta   = NULL,
                  beta    = NULL)
 
-      if (options$vign.var == "homo") 
+      if (options$vign.var == "homo")
         GR$se.vign <- 0
-      
+
     }
-    
+
     #### A.2.a EXTRACTION of parameters
     parm$pvec <- b
     parm <- unpackv(parm)
     #print(parm$start)
-          
+
     ## SET-UP...
     LL.vign <- LL.self <- NULL
     vign.prob <- list()
@@ -74,7 +74,7 @@ anchors.chopit.fit <- function(data, parm, count, options) {
     beta <- parm$start$beta
     gamma<- parm$start$gamma
     gamma1<- parm$start$gamma1
-    for (iij in 1:count$n.vign.set) {
+    for (iij in seq_len(count$n.vign.set)) {
       zti <- ifelse( count$n.vign.set > 1, iij, "")
       txt1 <- paste("theta",zti," <- parm$start$theta",zti,sep="")
       eval(parse(text=txt1))
@@ -89,12 +89,12 @@ anchors.chopit.fit <- function(data, parm, count, options) {
 #       print("theta")   ;print(theta)
        print("sigma.vign");print(sigma.vign)
        print("sigma.self");print(sigma.self)
-       print("sigma.re")  ;print(sigma.re)  
+       print("sigma.re")  ;print(sigma.re)
      }
-    
-    ## 
+
+    ##
     ## SANITY CHECKS!
-    ## 
+    ##
     if (any(sigma.vign <= 0)) {
       if (print.oob) {
         cat("\nILLEGAL vignette variance value(s):",sigma.vign,"\n")
@@ -126,12 +126,12 @@ anchors.chopit.fit <- function(data, parm, count, options) {
       }
       if (options$optimizer!="genoud") return(NA) else return(1e16)
     }
-    
+
     ##
     ## End sanity check
-    ## 
+    ##
 
-    if (options$debug > 1) 
+    if (options$debug > 1)
       cat("anchors.chopit.fit::chopit.llog : end sanity checks\n")
 
     ## JW: GAMMA and TAU --- replaced with function...
@@ -161,7 +161,7 @@ anchors.chopit.fit <- function(data, parm, count, options) {
           print(Vtaus)
           print(b)
         }
-        
+
       }
       if (!do.gr) {
         if (options$optimizer!="genoud")  return(1e16)
@@ -171,7 +171,7 @@ anchors.chopit.fit <- function(data, parm, count, options) {
         return( rep(Inf,sum(unlist(parm$estimated))) )
       }
     }
-    
+
     if (count$n.self > 0) {
       Staus <- anchors.chopit.tau(data$v0s,gamma,data$v0s1,gamma1,offset,
                         count$nobs.self,count$n.cat,count$n.tau.set,
@@ -179,8 +179,8 @@ anchors.chopit.fit <- function(data, parm, count, options) {
                         options$linear,options$debug,
                                   do.gr,options$verbose)
 #       cat("Staus\n"); print(Staus)
-  
-  
+
+
       ## Error trap
       if (is.null(Staus) || is.null(Vtaus)) {
         if (debug > 0) cat("chopit.llog: infinite value trap 2\n")
@@ -199,12 +199,12 @@ anchors.chopit.fit <- function(data, parm, count, options) {
       }
     }
 
-    
+
     if (options$rprof)
       Rprof("chopit.llog",append=TRUE,interval=0.005)
-    
+
     #### A.2.b VIGNETTE COMPONENT OF LIKELIHOOD
-    ## NEW: sigma.vign (vec)          -- in parm 
+    ## NEW: sigma.vign (vec)          -- in parm
     ##      thetaN (vec)          -- in parm
     ##      univ   (list of list) -- DONE
     ##      n.vign (vec)          -- DONE
@@ -212,11 +212,11 @@ anchors.chopit.fit <- function(data, parm, count, options) {
     llik1 <- 0
     ## Loop unnecessary with 1 set of vigns
     if (count$n.vign.set > 0) {
-      for (idx.vign.set in 1:count$n.vign.set) {
+      for (idx.vign.set in seq_len(count$n.vign.set)) {
         vign.prob[[idx.vign.set]] <- list()
 
         zti <- ifelse( count$n.vign.set > 1, idx.vign.set, "")
-        
+
         tmp.theta <- eval(parse(text=paste("theta",zti,sep="")))
         ## which of the taus will be used for this particular set of vign?
         voffset <- ( parm$vign.map[idx.vign.set] -1 )*count$nobs.vign*(count$n.cat-1)
@@ -226,13 +226,13 @@ anchors.chopit.fit <- function(data, parm, count, options) {
 #            range(voffset + c(1:(count$nobs.vign*(count$n.cat-1)))),"\n")
         ## extract vignette responses
 #        print(tmp.taus)
-        
+
         ## IF NO vign.set LOOP, then just replace zz with "correct" single version
         #zz <- eval(parse(text=paste("z",idx.vign.set,sep="")))
         zz <- data$z0
-        
+
         ## LOOP over vignettes in set
-        for (idx.vign in 1:count$n.vign) {
+        for (idx.vign in seq_len(count$n.vign)) {
 
           if (options$debug > 1)
             cat("Doing vignette",idx.vign,"in set",idx.vign.set,"\n")
@@ -241,7 +241,7 @@ anchors.chopit.fit <- function(data, parm, count, options) {
             voffset <- ( idx.vign - 1 )*count$nobs.vign*(count$n.cat-1)
             tmp.taus <- Vtaus[ voffset + c(1:(count$nobs.vign*(count$n.cat-1)))]
           }
-          
+
           if (options$vign.var=="homo") {
             tmp.vign.se <- sigma.vign
           } else if (idx.vign.set == 1) {
@@ -250,11 +250,11 @@ anchors.chopit.fit <- function(data, parm, count, options) {
             ## JW: is this right index??
             tmp.vign.se <- sigma.vign[sum( count$n.vign[1:(idx.vign.set-1)] ) + idx.vign]
           }
-          
+
           if (!do.gr) {
-            ## JW: do a fitted == TRUE version!          
+            ## JW: do a fitted == TRUE version!
 #             if (options$debug > 0) {
-#               cat("ll.oprobit1\n") 
+#               cat("ll.oprobit1\n")
 # #              print(zz[,idx.vign])
 # #             print(tmp.taus)
 # #              print(rep( tmp.theta[idx.vign], count$nobs.vign))
@@ -265,7 +265,7 @@ anchors.chopit.fit <- function(data, parm, count, options) {
 #               print(tmp.vign.se)
 #               print(n.cat)
 #             }
-            
+
             val <- ll.oprobit(zz[,idx.vign],
                               rep( tmp.theta[idx.vign], count$nobs.vign),
                               tmp.vign.se,
@@ -284,7 +284,7 @@ anchors.chopit.fit <- function(data, parm, count, options) {
             if (get.LL) {
               LL.vign <- c(LL.vign,-sum(val))
             }
-            
+
           } else {
             gval <- gr.oprobit.vign.C(zz[,idx.vign],
                                     rep( tmp.theta[idx.vign], count$nobs.vign),
@@ -299,24 +299,24 @@ anchors.chopit.fit <- function(data, parm, count, options) {
               cat("Gradients of vign\n")
               print(gval)
             }
-            
+
             GR$theta  <- c(GR$theta, gval$theta)
 
             GR$gamma1 <- GR$gamma1+ gval$gamma1
             GR$gamma  <- GR$gamma + gval$gamma
-            
+
 #             ## JW??
 #             ii <- (idx.vign.set-1) * (n.cat-2)*nvars.gamma + c(1:((n.cat-1)*nvars.gamma))
-# 
+#
 # #            ## JW
 # #            print("GAMMA")
 # #            print(ii)
 # #            print(gval$gamma)
 # #            print(GR$gamma)
-#             
+#
 #             ## JW??
 #             GR$gamma[ii]  <- GR$gamma[ii] + gval$gamma
-            
+
             if (options$vign.var=="homo") {
               GR$se.vign<- GR$se.vign + gval$sigma
             } else {
@@ -332,14 +332,14 @@ anchors.chopit.fit <- function(data, parm, count, options) {
 #      print("VIGN")
 #      print(GR)
 #    }
-  
+
 #### A.2.c SELF-REPORT COMPONENT OF LIKELIHOOD WITH RANDOM EFFECT
     llik2 <- 0
     if (count$n.self > 0) {
       xb <- data$x0 %*% beta
       if (parm$estimated$sigma.re == FALSE || count$n.self == 1) { ## NO random effect
-        
-        for (idx.self in 1:count$n.self) { ## loop over self questions w/o RE
+
+        for (idx.self in seq_len(count$n.self)) { ## loop over self questions w/o RE
 
           ## extract
           voffset <- ( idx.self -1 )*count$nobs.self*(count$n.cat-1)
@@ -348,7 +348,7 @@ anchors.chopit.fit <- function(data, parm, count, options) {
 
           #cat("S VOFFSET",voffset,"tmp.taus",range(voffset + c(1:(count$nobs.self*(count$n.cat-1)))),"\n")
 
-          
+
 #          ## and select
 #          if (parm$estimated$sigma.re == FALSE) {
 #            tmp.sigma <- tmp.sigma.self
@@ -358,7 +358,7 @@ anchors.chopit.fit <- function(data, parm, count, options) {
 #            tmp.sigma <- sqrt(tmp.sigma.self^2+tmp.sigma.re^2)
 #          }
 
-          
+
           if (!do.gr) {
             if (options$debug > 1) { cat("ll.oprobit2\n") }
             val <- ll.oprobit(data$y0[,idx.self],
@@ -374,7 +374,7 @@ anchors.chopit.fit <- function(data, parm, count, options) {
               cat("SELF LLIK2 (no RE):",idx.self,val,"\n")
 
           }
-          
+
         }
         if (do.gr) {
           gval <- gr.oprobit.self.C(data$y0,
@@ -387,37 +387,37 @@ anchors.chopit.fit <- function(data, parm, count, options) {
                                     count$n.cat,
                                     count$n.self,
                                     options$debug)
-          
+
           GR$beta   <-   gval$beta
           GR$se.self<-   gval$sigma
           GR$gamma  <-   GR$gamma  + gval$gamma
           GR$gamma1 <-   GR$gamma1 + gval$gamma1
         }
-          
+
       } else { ## WITH random effect
         if (options$int.meth=="gh") {## estimated with gaussian hermite quadrature
 
           tmp.sigma.self <- as.numeric(sigma.self)[1]
           tmp.sigma.re   <- sigma.re
-          
+
           llik2 <- ll.self.gh(data$y0, xb,
                             tmp.sigma.self,tmp.sigma.re,
                             Staus, gh, count$n.cat, options$debug>0)
-          
+
           if (!fitted) {
             if (options$debug > 1)
               cat("SELF LLIK2 (GH):",llik2,"\n")
           } else {
             self.prob[[1]] <- NULL
           }
-          
+
         } else {  # estimated with adaptive integration
 
           stop("Only Gaussian hermite quadrature currently operational\n")
-          
+
 #          tmp.sigma.self <- as.real(sigma.self)[1]
 #          tmp.sigma.re   <- sigma.re
-#            
+#
 #          llik2 <-ll.self.ai(data$y0,data$x0%*%beta,
 #                           tmp.sigma.self,tmp.sigma.re,
 #                           tau2,count$n.cat, options,options$debug>0)
@@ -428,15 +428,15 @@ anchors.chopit.fit <- function(data, parm, count, options) {
 #          } else {
 #            self.prob[[1]] <- NULL
 #          }
-        } 
+        }
       }
     }
-    
+
     if (options$rprof)
       Rprof(NULL)
 
-    
-    
+
+
     if (do.gr) {
       ## only keep things which are estimated!
       gf <- function(x,y) {
@@ -455,14 +455,14 @@ anchors.chopit.fit <- function(data, parm, count, options) {
       GR$theta  <- gf( GR$theta, Estimated.theta.all  )
       GR$se.vign<- gf( GR$se.vign, parm$estimated$sigma.vign )
       GR$se.self<- gf( GR$se.self, parm$estimated$sigma.self )
-      
+
       GR.out <- c(GR$gamma1,
                   GR$gamma,
                   GR$se.self,
                   GR$se.vign,
                   GR$theta,
                   GR$beta )
-      if (options$debug>1) { 
+      if (options$debug>1) {
         cat("GR:\n")
         print(-GR.out)
       }
@@ -472,23 +472,23 @@ anchors.chopit.fit <- function(data, parm, count, options) {
         print(GR)
         print(GR.out)
       }
-      
+
       return(-GR.out)
     }
 
     if (get.LL) {
       LL.self <- -llik2
-      if (options$debug > 0) 
+      if (options$debug > 0)
         cat("SELF LLIK2 get.ll:",LL.self,"\n")
     }
-    
+
     ## just getting probabilities? end here
     if (get.LL)
       return( list( LL.self=LL.self, LL.vign=LL.vign) )
     if (fitted)
       return( list(self=self.prob,vign=vign.prob))
-    
-    #### A.2.d OVERALL -Log-Likelihood 
+
+    #### A.2.d OVERALL -Log-Likelihood
     llik <- -(llik1+llik2)
 
     if (options$debug > 0) {
@@ -503,7 +503,7 @@ anchors.chopit.fit <- function(data, parm, count, options) {
       if (options$debug > 0) cat("Bad -LL:",llik,"\n")
       return(count$nobs.penalty*200)
     }
-    
+
   } ## END of loglikelihood
 
   ## GRADIENT
@@ -511,28 +511,28 @@ anchors.chopit.fit <- function(data, parm, count, options) {
     rval <- chopit.llog(b,do.gr=TRUE,verbose=verbose)
     return(rval)
   }
-  
+
   ## and given (potentially) overwritten theta estimated flags:
   Estimated.theta.all <- NULL
-  for (i in 1:count$n.vign.set) {
+  for (i in seq_len(count$n.vign.set)) {
     zti <- ifelse( count$n.vign.set > 1, i, "")
     txt <- paste("Estimated.theta.all <- c(Estimated.theta.all, parm$estimated$theta",zti,")",sep="")
     eval(parse(text=txt))
   }
-  
-  
+
+
   #############################################################
-  ## 
+  ##
   ## A.6 OPTIMIZING THE FUNCTION
-  ## 
+  ##
   #############################################################
-  if (options$debug > 0) 
+  if (options$debug > 0)
     cat("anchors.chopit.fit: optimize the likelihood function\n\n")
 
 #  if (normalize != "self")
 #    do.oprobit <- FALSE
-  
-  
+
+
   ## testing, testing...
   if (verbose) {
     cat("\nStarting parameters:\n")
@@ -547,10 +547,10 @@ anchors.chopit.fit <- function(data, parm, count, options) {
 #      tmp.GR <- chopit.llog(parm$pvec,do.gr=TRUE);
 #      print(as.matrix(tmp.GR),digits=16)
 #    }
-    
+
   }
 
-  if (verbose) 
+  if (verbose)
     cat("\n\nStarting chopit() estimation...\n")
 
 
@@ -558,7 +558,7 @@ anchors.chopit.fit <- function(data, parm, count, options) {
     gh   <- as.matrix(options$int.gh)
   else
     gh <- as.matrix( ghweights(options$int.ghorder) )
-  
+
   if (options$debug > 5) {
     ## we may need GH for the test of the LL
     ## so use the first version... which is where we are going to start anyway
@@ -578,7 +578,7 @@ anchors.chopit.fit <- function(data, parm, count, options) {
              gr        = NULL,
              time      = NULL
              )
-    
+
     class(rv) <- "anchors.chopit.fit"
     return(invisible(rv))
   }
@@ -593,14 +593,14 @@ anchors.chopit.fit <- function(data, parm, count, options) {
   }
 
   if (options$optimizer == "genoud") {
-    if (verbose) 
+    if (verbose)
       cat("anchors.chopit.fit: entering GENOUD optimization\n")
-    
-    # loaded automatically by Dependencies: 
+
+    # loaded automatically by Dependencies:
 	# require(rgenoud) || stop("rgenoud library required to invoke optimizer='genoud' option")
 
     domain <- options$domain
-    
+
     d.gamma1 <- rep( -domain, sum(c(parm$estimated$gamma1, parm$estimated$gamma)) )
     d.gamma2 <- rep(  domain, sum(c(parm$estimated$gamma1, parm$estimated$gamma)) )
 #    print(d.gamma1)
@@ -609,13 +609,13 @@ anchors.chopit.fit <- function(data, parm, count, options) {
     d.gamma  <- as.numeric(rbind(d.gamma1,d.gamma2))
 
     lb.se <- ifelse(options$linear, 0.001, -5)
-    
+
     d.re     <- rep( c(lb.se, domain), length(parm$estimated$sigma.re))
     d.self   <- rep( c(lb.se, domain), length(parm$estimated$sigma.self))
     d.vign   <- rep( c(lb.se, domain), length(parm$estimated$sigma.vign))
     d.theta  <- rep( c(-domain   , domain), length(parm$estimated$theta)) ## theta2..
     d.beta   <- rep( c(-50  ,50), length(parm$estimated$beta  ))
-    
+
     Domains <- matrix(c(d.gamma,
                         d.re,
                         d.self,
@@ -631,23 +631,23 @@ anchors.chopit.fit <- function(data, parm, count, options) {
       print( as.matrix(unlist(parm$estimated)))
     }
 
-    
-    
+
+
     Domains <- Domains[ unlist(parm$estimated) , ]
-    
+
 
     if (NROW(Domains) != length(parm$pvec)) {
       cat("ERROR! Genoud domain not of correct dimension:", dim(Domains),": length of pvec",length(parm$pvec),"\n")
       print(parm$pvec)
     }
-    
+
     print.oob <- FALSE
-    stime <- system.time(out <- 
+    stime <- system.time(out <-
            genoud(chopit.llog,
                   nvars           = length(parm$pvec),
                   pop.size        = options$pop.size,
                   starting.values = parm$pvec,
-                  gr              = tmp.chopit.gr, 
+                  gr              = tmp.chopit.gr,
                   wait.generations= options$wait.generations,
                   MemoryMatrix    = options$MemoryMatrix,
                   Domains         = Domains,
@@ -657,14 +657,14 @@ anchors.chopit.fit <- function(data, parm, count, options) {
                   print.level     = options$print.level,
                   ))
     print.oob <- options$print.oob
-                  
-                  
+
+
   } else {
-          
+
     print.oob <- FALSE
     stime <- system.time(out <- optim(par = parm$pvec,
                                       fn  = chopit.llog,
-                                      gr  = tmp.chopit.gr, 
+                                      gr  = tmp.chopit.gr,
                                       method =options$optim.method,
                                       control=list(trace=options$trace,
                                                    maxit=options$maxit,
@@ -673,7 +673,7 @@ anchors.chopit.fit <- function(data, parm, count, options) {
                                       ))
     print.oob <- options$print.oob
   }
-  
+
   final.gr <- NULL
   if (options$analytic) {
     print.oob <- TRUE
@@ -683,7 +683,7 @@ anchors.chopit.fit <- function(data, parm, count, options) {
       print(final.gr)
     }
   }
-  
+
   if (options$debug > 0)  {
     cat("\nCompleted fitting:\n")
     cat("optim() estimation time:",stime,"\n")
@@ -705,7 +705,7 @@ anchors.chopit.fit <- function(data, parm, count, options) {
 
   get.LL <- TRUE
   out.LL <- chopit.llog(parm$pvec)
-  get.LL <- FALSE  
+  get.LL <- FALSE
 
 
   rv <- list(data   = data,
@@ -722,7 +722,7 @@ anchors.chopit.fit <- function(data, parm, count, options) {
              )
 
   class(rv) <- "anchors.chopit.fit"
-  
+
   return(invisible(rv))
 
 }

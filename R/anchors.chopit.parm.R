@@ -3,10 +3,10 @@
 ## Function: anchors.chopit.parm()
 ## Author  : Jonathan Wand <wand(at)stanford.edu>
 ## Created :  2008-04-20
-##  
+##
 ## DESCRIPTION: Function for analyzing data with anchoring vignettes
 ##
-## Extracted and refined from former chopit()  
+## Extracted and refined from former chopit()
 #######################################################################
 anchors.chopit.parm <- function( data, count, options ) {
 
@@ -15,24 +15,24 @@ anchors.chopit.parm <- function( data, count, options ) {
   debug <- options$debug
 
   if (options$linear) {
-    default.gamma1.constant <- options$defparm.lin.gamma.constant     
-    default.gamma.constant  <- options$defparm.lin.gamma.constant 
-    default.gamma           <- options$defparm.lin.gamma 
-    default.se              <- options$defparm.lin.se    
+    default.gamma1.constant <- options$defparm.lin.gamma.constant
+    default.gamma.constant  <- options$defparm.lin.gamma.constant
+    default.gamma           <- options$defparm.lin.gamma
+    default.se              <- options$defparm.lin.se
   } else {
-    default.gamma1.constant <- options$defparm.non.gamma.constant     
-    default.gamma.constant  <- options$defparm.non.gamma.constant 
-    default.gamma           <- options$defparm.non.gamma 
-    default.se              <- options$defparm.non.se    
+    default.gamma1.constant <- options$defparm.non.gamma.constant
+    default.gamma.constant  <- options$defparm.non.gamma.constant
+    default.gamma           <- options$defparm.non.gamma
+    default.se              <- options$defparm.non.se
   }
 
-  
+
   vnames <- list(x0 = colnames(data$x0) , ## this should be NULL if no.self=TRUE
                  y0 = colnames(data$y0) , ## this should be NULL if no.self=TRUE
                  v0 = colnames(data$v0v ),
                  v1 = colnames(data$v0v1),
                  z0 = colnames(data$z0) )
-  
+
 
   if (count$n.tau.set > 1) {
     init.gamma1n<- c(paste("gamma1.cut",
@@ -59,9 +59,9 @@ anchors.chopit.parm <- function( data, count, options ) {
                                         nrow=count$nvars.gamma,byrow=TRUE)),
                            ".", vnames$v0,
                            sep=""))
-    
+
   }
-  
+
   if (debug > 0) {
     cat("TEST: Dumping contents of init.gamman:\n")
     print(as.matrix(init.gamma1n))
@@ -76,9 +76,9 @@ anchors.chopit.parm <- function( data, count, options ) {
   l.sigma.vign <- paste("sigma.",tmp0,sep="")
   e.sigma.vign <- rep(TRUE ,count$n.vign)
 
-  
+
   if (debug > 0) cat("CHECKPOINT: set initial values of parameters\n")
-  
+
   parm <- list(
                ## list of DGP parameters (or starting values)
                start = list(
@@ -86,7 +86,7 @@ anchors.chopit.parm <- function( data, count, options ) {
                  gamma1      = rep(default.gamma,length(init.gamma1n)),
                  gamma      = rep(default.gamma,length(init.gamman)),
                  sigma.re = ifelse( options$random , default.se, default.se),
-                 sigma.self  = default.se, ## rep(0,count$n.self), --> at some point flex 
+                 sigma.self  = default.se, ## rep(0,count$n.self), --> at some point flex
                  sigma.vign  = s.sigma.vign
                  ),
                ## names for parameters... (automated)
@@ -108,12 +108,12 @@ anchors.chopit.parm <- function( data, count, options ) {
                  )
                )
   ## Add theta to parm list
-  if (debug > 0) 
+  if (debug > 0)
     cat("CHECKPOINT: Adding theta to parmeter list\n")
 
   ## Single set of vign assumed here, but keep loop for simplicity
   ## -> z0 used to make tmp0 directly
-  for (i in 1:count$n.vign.set) {
+  for (i in seq_len(count$n.vign.set)) {
     zti <- ifelse( count$n.vign.set > 1, i, "")
     txt1 <- paste("parm$start$theta",zti," <- rep(0.0,",count$n.vign[i],")",sep="")
                                         #    tmp0 <- as.character(eval(parse(text=paste("alphad$z",i,sep=""))))
@@ -146,18 +146,18 @@ anchors.chopit.parm <- function( data, count, options ) {
   }
 
   #############################################################
-  ## 
+  ##
   ## A.3 CUSTOMIZE DATA and PARAMETERS
-  ## 
-  #############################################################  
+  ##
+  #############################################################
   if (debug > 0) {
     cat("CHECKPOINT: customize data and parameters\n")
   }
-  
+
   ## Find the column of ones and zero out the intercept in beta!
   idx.constants.beta <- NULL
   if (count$n.self > 0) {
-    for (i in 1:length(vnames$x0)) {
+    for (i in seq_along(vnames$x0)) {
       idx.constants.beta <- c(idx.constants.beta,
                               ifelse( length(unique(data$x0[,i])) == 1, i, -i)
                               )
@@ -173,7 +173,7 @@ anchors.chopit.parm <- function( data, count, options ) {
       cat(  "ERROR! Program is quitting now.\n\n")
       stop("")
     }
-    
+
     if (!options$silence) cat("\nchopit() will be identified/normalized by:\n")
     if (options$normalize=="self") {
       if ( sum(idx.constants.beta>0) == 1) {
@@ -187,7 +187,7 @@ anchors.chopit.parm <- function( data, count, options ) {
       }
       if (!options$silence) cat("2. setting variance of first self question to 1\n\n")
       parm$start$sigma.self[1] <- default.se
-      parm$estimated$sigma.self[1] <- FALSE 
+      parm$estimated$sigma.self[1] <- FALSE
       if (debug > 0)
         cat("actual value",parm$start$sigma.self[1],"\n")
     } else if (options$normalize=="hilo") {
@@ -198,7 +198,7 @@ anchors.chopit.parm <- function( data, count, options ) {
       parm$start$theta[length(parm$start$theta)] <- 1
       parm$estimated$theta[1] <- FALSE
       parm$estimated$theta[length(parm$estimated$theta)] <- FALSE
-      
+
       if ( sum(idx.constants.beta>0) == 1) {
         ii <- idx.constants.beta[idx.constants.beta>0]
         parm$estimated$beta[ii] <- TRUE
@@ -214,7 +214,7 @@ anchors.chopit.parm <- function( data, count, options ) {
 
       if (!options$silence) cat("1. setting MEAN of first vignette to 0\n")
       if (!options$silence) cat("2. setting VARIANCE of first vignette to 1\n\n")
-      
+
       if ( sum(idx.constants.beta>0) == 1) {
         ii <- idx.constants.beta[idx.constants.beta>0]
         parm$estimated$beta[ii] <- TRUE
@@ -239,7 +239,7 @@ anchors.chopit.parm <- function( data, count, options ) {
   ## Find the column of ones and -1 the intercept(s) in gamma
   ## JW: currently uses vignette subset to determine constants
   idx.constants.gamma <- NULL
-  for (i in 1:count$nvars.gamma) {
+  for (i in seq_len(count$nvars.gamma)) {
     idx.constants.gamma <- c(idx.constants.gamma,
                              ifelse( length(unique(data$v0v[,i])) == 1, i, -i)
                              )
@@ -259,7 +259,7 @@ anchors.chopit.parm <- function( data, count, options ) {
     no.gamma.constant <- FALSE
     ii <- seq( idx.constants.gamma[idx.constants.gamma>0], length(init.gamman), count$nvars.gamma )
     ntmp <- sum(ii)
-    tmp  <- 1:ntmp      
+    tmp  <- 1:ntmp
     parm$start$gamma[ii]  <- default.gamma.constant # (tmp-1)/ntmp
     if (debug > 0) {
       cat("SET constant gamma",default.gamma.constant,"\n")
@@ -272,7 +272,7 @@ anchors.chopit.parm <- function( data, count, options ) {
 
   ## now do gamma1
   idx.constants.gamma1 <- NULL
-  for (i in 1:count$nvars.gamma1) {
+  for (i in seq_len(count$nvars.gamma1)) {
     idx.constants.gamma1 <- c(idx.constants.gamma1,
                              ifelse( length(unique(data$v0v1[,i])) == 1, i, -i)
                              )
@@ -292,7 +292,7 @@ anchors.chopit.parm <- function( data, count, options ) {
     no.gamma1.constant <- FALSE
     ii <- seq( idx.constants.gamma1[idx.constants.gamma1>0], length(init.gamma1n), count$nvars.gamma1 )
     ntmp <- sum(ii)
-    tmp  <- 1:ntmp      
+    tmp  <- 1:ntmp
     parm$start$gamma1[ii]  <- default.gamma1.constant # (tmp-1)/ntmp
     if (debug > 0) {
       cat("SET constant gamma1",default.gamma1.constant,"\n")
@@ -301,7 +301,7 @@ anchors.chopit.parm <- function( data, count, options ) {
     }
   }
 
-  
+
   ## OVERRIDE DEFAULTS HERE!
   if (!is.null(options$start$start)) {
     if (!options$silence) cat("\n anchors.chopit.parm(): Using user specified starting values\n")
@@ -334,13 +334,13 @@ anchors.chopit.parm <- function( data, count, options ) {
 #  if (debug > 0)
 #    cat("CHECKPOINT: done overriding defaults\n")
 
-  
+
   ## NOW invoke options
   if (options$vign.var == "homo") {
     if (count$n.vign.set == 1) {
       if (!options$silence) cat("Forcing vignettes to have common variance parameter because vign.var='homo'\n")
-      parm$start$sigma.vign     <- parm$start$sigma.vign[1]     
-      parm$estimated$sigma.vign <- parm$estimated$sigma.vign[1]     
+      parm$start$sigma.vign     <- parm$start$sigma.vign[1]
+      parm$estimated$sigma.vign <- parm$estimated$sigma.vign[1]
       parm$labels$sigma.vign    <- parm$labels$sigma.vign[1]
     } else {
       warning("Cannot force multiple sets of vignettes to have common variance parameter")
@@ -352,12 +352,12 @@ anchors.chopit.parm <- function( data, count, options ) {
   else
     parm$vign.map  <- 1:count$n.vign.set
 
-  ## 
+  ##
   if (debug > 0) {
     cat("TEST: dumping pre-packed 'parm' list:\n")
     print(parm)
   }
-  
+
   ## pack stuff
   parm <- packv(parm)
   if (is.null(parm)) stop("Packing of starting values failed!\n")
@@ -369,6 +369,6 @@ anchors.chopit.parm <- function( data, count, options ) {
     cat("TEST: dumping 'parm' list:\n")
     print(parm)
   }
-  
+
   return(parm)
 }

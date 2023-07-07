@@ -21,9 +21,9 @@ anchors.combn <- function(adata, fdata, type, options) {
 
   if (is.null(adata$formula$cpolr))
     adata$formula$cpolr <- ~ 1
-  if (type == "C") 
+  if (type == "C")
       fo <- as.formula( paste( "cbind(Cs,Ce) ~ ",  as.character( adata$formula$cpolr)[2] ))
-  if (type == "B") 
+  if (type == "B")
       fo <- as.formula( paste( "cbind(Bs,Be) ~ ",  as.character( adata$formula$cpolr)[2] ))
 
 
@@ -39,37 +39,37 @@ anchors.combn <- function(adata, fdata, type, options) {
     if (options$debug>0) cat("entropy: fitted/cpolr\n")
     cp <- fitted.anchors.rank(ra, ties="cpolr", average=TRUE, unconditional=FALSE)
     cp <- entropy.calc( cp )
-    
+
     return( c( as.numeric(paste(vidx, sep="", collapse="")),
               cp, me,
               ra$summary$n.interval, ra$summary$avg.span, ra$summary$max) )
   }
 
   ## calculate the entropy for subsets of vignettes
-  for (i in 1:n.vign) {
+  for (i in seq_len(n.vign)) {
     if (options$verbose) cat("vign:",i,"\n")
     mties <- rbind(  mties, fn(i) )
   }
-  for (i in (2:n.vign)) {
-    r <- as.matrix(combn(1:n.vign,i))
-    for (j in 1:ncol(r)) {
+  for (i in seq_len(n.vign)[-1]) {
+    r <- as.matrix(combn(1:n.vign, i))
+    for (j in seq_len(ncol(r))) {
       if (options$verbose) cat("vign:",r[,j],"\n")
       mties <- rbind(mties, fn( r[,j] ) )
     }
   }
 
   mties <- as.data.frame(mties)
-  
+
   oo <- rev(order(mties[,2]))
   mties <- mties[oo,]
-  
+
   names(mties) <- c("Vignettes",
                     "Estimated entropy",
                     "Minimum entropy",
                     "Interval Cases",
                     "Span avg.",
                     "Max. rank")
-  
+
   rownames(mties) <- 1:nrow(mties)
   class(mties) <- c(class(mties),"anchors.combn")
   return(mties)

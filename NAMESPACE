@@ -2,7 +2,6 @@ useDynLib(anchors, .registration = TRUE)
 
 import(grDevices)
 import(graphics)
-import(MASS)
 import(rgenoud)
 import(stats)
 import(utils)

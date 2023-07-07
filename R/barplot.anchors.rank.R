@@ -41,7 +41,7 @@ barplot.anchors.rank <- function(height, ... ,
   w <-  rbind(w,
          fitted.anchors.rank( height, ties=ties, average=TRUE, unconditional=unconditional))
   if (length(args) > 0) {
-    for (i in 1:length(args)) {
+    for (i in seq_along(args)) {
 
       if (!inherits(args[[i]], "anchors.rank"))
         break

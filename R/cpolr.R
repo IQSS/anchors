@@ -2,7 +2,7 @@
 # revised version of file MASS/polr.q:
 #   [ original copyright (C) 1994-2005 W. N. Venables and B. D. Ripley ]
 #   [ original 18266 bytes, Sep  5 2006 09:03 ]
-# 
+#
 # Modifications by Jonathan Wand as follows
 # ON 2006-11-03: JW
 # - Response variable:
@@ -26,15 +26,15 @@ cpolr <- function(formula, data, weights, start, ..., subset,
                   debug = 0)
 {
   if (debug > 0) {cat("In cpolr\n") }
-  
+
     logit <- function(p) log(p/(1 - p))
 
     fmin <- function(beta) {
 #      cat("fmin",pc,q,"\n")
-      
+
         theta <- beta[pc + 1:q]
         gamm <- c(-100, cumsum(c(theta[1], exp(theta[-1]))), 100)
-      
+
         eta <- offset
         if (pc > 0)
             eta <- eta + drop(x %*% beta[1:pc])
@@ -44,7 +44,7 @@ cpolr <- function(formula, data, weights, start, ..., subset,
 #      print(length(gamm[C[,1]]))
 #      print(gamm)
 #      print(table(C[,1]))
-      
+
         pr <- pfun(gamm[ C[,2] + 1] - eta) - pfun(gamm[ C[,1] ] - eta)
         if (all(pr > 0))
             -sum(wt * log(pr))
@@ -130,7 +130,7 @@ cpolr <- function(formula, data, weights, start, ..., subset,
 #    print(lev)
 #    print(lev.orig)
 #    print(lev.missing)
-    
+
     if(length(lev) <= 2) {
 #      cat("cpolr: response must have 3 or more levels, skipping.\n")
       warning("cpolr response must have 3 or more levels, skipping.\n")
@@ -145,7 +145,7 @@ cpolr <- function(formula, data, weights, start, ..., subset,
       ## now tricky stuff... fill in zeroes
       ## for C[,2] use, get upper bound.. which is the last smaller category
       lev.last <- 1
-      for (ii in 1:length(lev.map)) {
+      for (ii in seq_along(lev.map)) {
         if (lev.map[ii] != 0) lev.last <- lev.map[ii]
         lev.map.ub[ii] <- lev.last
       }
@@ -155,8 +155,8 @@ cpolr <- function(formula, data, weights, start, ..., subset,
         if (lev.map[ii] != 0) lev.last <- lev.map[ii]
         lev.map.lb[ii] <- lev.last
       }
-      
-      C.orig <- C ## keep a copy      
+
+      C.orig <- C ## keep a copy
       C[,1]  <- lev.map.lb[ C[,1] ] ## remap
       C[,2]  <- lev.map.ub[ C[,2] ] ## remap
 
@@ -167,11 +167,11 @@ cpolr <- function(formula, data, weights, start, ..., subset,
       if (debug > 1) { cat("C\n"); print(C ) }
     }
 ###################################################################################
-    
+
 #    y <- unclass(y)
     q <- length(lev) - 1
     Y <- matrix(0, n, q)
-    .polrY1 <- col(Y) ==  C[,2] 
+    .polrY1 <- col(Y) ==  C[,2]
     .polrY2 <- col(Y) ==  C[,1]  - 1
     if(missing(start)) {
         # try logistic/probit regression on 'middle' cut
@@ -216,13 +216,13 @@ cpolr <- function(formula, data, weights, start, ..., subset,
         eta <- rep(0, n)
     }
 
-    cumpr <- matrix(pfun(matrix(zeta, n, q, byrow=TRUE) - eta), , q)
+    cumpr <- matrix(pfun(matrix(zeta, n, q, byrow=TRUE) - eta), ncol = q)
     fitted <- t(apply(cumpr, 1, function(x) diff(c(0, x, 1))))
     dimnames(fitted) <- list(row.names(m), lev)
 
     ## rebuild fitted values if there were holes in responses
     if (any(lev.missing)) {
-      fitted2 <- matrix(0,n,max.lev.orig) 
+      fitted2 <- matrix(0,n,max.lev.orig)
       for (i in 1:max.lev.orig) {
         if ( lev.map[i] == 0) next
         ## get the estimated/collapsed category fitted value and put it in the right place
@@ -231,8 +231,8 @@ cpolr <- function(formula, data, weights, start, ..., subset,
       fitted <- fitted2
       dimnames(fitted) <- list(row.names(m), 1:max.lev.orig)
     }
-    
-    ## 
+
+    ##
     fit <- list(coefficients = beta, zeta = zeta, theta=theta, deviance = deviance,
                 fitted.values = fitted,
                 lev = lev.orig,
@@ -263,13 +263,13 @@ vcov.cpolr <- function(object, ...)
   ## for the ginv function...
 	# Now loaded by Dependencies
   	# require(MASS)
-  if(is.null(object$Hessian)) {
+  if (is.null(object$Hessian)) {
     cat("\nRe-fitting cpolr() to get Hessian\n\n")
     flush.console
     object <- update(object, Hess=TRUE,
                      start=c(object$coef, object$theta))
   }
-  structure(ginv(object$Hessian), dimnames = dimnames(object$Hessian))
+  structure(MASS::ginv(object$Hessian), dimnames = dimnames(object$Hessian))
 }
 
 

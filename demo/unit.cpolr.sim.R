@@ -1,6 +1,6 @@
-## 
+##
 ## unit test provided by Olivia Lau
-## 
+##
 cat("Checking cpolr against monte carlo simulations for vector responses\n")
 data(freedom)
 C <- anchors(self ~ vign1 + vign3 + vign6, data = freedom, method="C")
@@ -25,8 +25,8 @@ montecarlo <- function(tau, mu, x, prob, lambda) {
   ## generating scalar response
   tmp1 <- rnorm(length(mu), mean = mu, sd = 1)
   out <- matrix(FALSE, nrow = length(mu), ncol = length(tau))
-  for (i in 1:length(tau)) out[,i] <- tmp1 >= tau[i]
-  y <- apply(out, 1, sum)
+  for (i in seq_along(tau)) out[,i] <- tmp1 >= tau[i]
+  y <- rowSums(out)
   Cs <- Ce <- y + 1
   names(Cs) <- names(Ce) <- rownames(x)
   ## idx = indicator for which observaitons are censored
