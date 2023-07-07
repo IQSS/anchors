@@ -643,18 +643,18 @@ anchors.chopit.fit <- function(data, parm, count, options) {
 
     print.oob <- FALSE
     stime <- system.time(out <-
-           genoud(chopit.llog,
-                  nvars           = length(parm$pvec),
-                  pop.size        = options$pop.size,
-                  starting.values = parm$pvec,
-                  gr              = tmp.chopit.gr,
-                  wait.generations= options$wait.generations,
-                  MemoryMatrix    = options$MemoryMatrix,
-                  Domains         = Domains,
-                  BFGS            = options$BFGS,
-                  hessian         = options$hess,
-                  max.generations = options$max.generations,
-                  print.level     = options$print.level,
+                           rgenoud::genoud(chopit.llog,
+                                           nvars           = length(parm$pvec),
+                                           pop.size        = options$pop.size,
+                                           starting.values = parm$pvec,
+                                           gr              = tmp.chopit.gr,
+                                           wait.generations= options$wait.generations,
+                                           MemoryMatrix    = options$MemoryMatrix,
+                                           Domains         = Domains,
+                                           BFGS            = options$BFGS,
+                                           hessian         = options$hess,
+                                           max.generations = options$max.generations,
+                                           print.level     = options$print.level,
                   ))
     print.oob <- options$print.oob
 
